@@ -1,27 +1,30 @@
 import requests
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
 from .config import IterableConfig
-from exceptions import IterableAPIException, RateLimitException, AuthenticationException
+from .resources import UsersResource, EventsResource, WorkflowResource
+from .exceptions import (
+    IterableAPIException,
+    RateLimitException,
+    AuthenticationException,
+)
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class IterableClient:
     def __init__(self, config: IterableConfig):
         self.config = config
         self.session = self._create_session()
-        # self.rate_limiter = RateLimiter()
+
+        self.users = UsersResource(self)
+        self.events = EventsResource(self)
+        self.workflows = WorkflowResource(self)
 
     def _create_session(self):
         session = requests.Session()
-        retry = Retry(
-            total=self.config.max_retries,
-            backoff_factor=self.config.backoff_factor,
-            status_forcelist=[429, 500, 502, 503, 504]
-        )
-        adapter = HTTPAdapter(max_retries=retry)
-        session.mount('https://', adapter)
+        adapter = HTTPAdapter(max_retries=self.config.max_retries)
+        session.mount("https://", adapter)
         session.headers.update({"Api-Key": self.config.api_key})
         return session
 
@@ -31,11 +34,7 @@ class IterableClient:
 
         try:
             response = self.session.request(
-                method,
-                url,
-                json=data,
-                params=params,
-                timeout=self.config.timeout
+                method, url, json=data, params=params, timeout=self.config.timeout
             )
             response.raise_for_status()
             return response.json()
@@ -43,9 +42,13 @@ class IterableClient:
             if e.response.status_code == 429:
                 raise RateLimitException("Rate limit exceeded", response=e.response)
             elif e.response.status_code == 401:
-                raise AuthenticationException("Authentication failed", response=e.response)
+                raise AuthenticationException(
+                    "Authentication failed", response=e.response
+                )
             else:
-                raise IterableAPIException(f"HTTP error occurred: {e}", response=e.response)
+                raise IterableAPIException(
+                    f"HTTP error occurred: {e}", response=e.response
+                )
         except requests.exceptions.RequestException as e:
             raise IterableAPIException(f"An error occurred: {e}")
 

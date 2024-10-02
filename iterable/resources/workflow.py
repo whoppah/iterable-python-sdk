@@ -3,7 +3,7 @@ from ..exceptions import ValidationException
 
 
 class WorkflowResource(BaseResource):
-    def trigger_workflow(self, user_id: str, workflow_id: int, data_fields: dict = None):
+    def trigger(self, user_id: str, workflow_id: int, data_fields: dict = None):
         """
         Trigger a workflow for a user in Iterable.
 

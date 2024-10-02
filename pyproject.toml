@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "iterable-sdk"
+name = "iterable"
 version = "0.1.0"
 description = ""
-authors = ["Ömer <omer@whoppah.com>"]
+authors = ["Omer <omer@whoppah.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.11"
 requests = "^2.32.3"
 ruff = "^0.6.7"
 

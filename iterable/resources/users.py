@@ -2,7 +2,7 @@ from .base import BaseResource
 
 
 class UsersResource(BaseResource):
-    def update_user(self, data):
+    def update(self, data):
         """
         Update or create a user.
 
@@ -12,7 +12,7 @@ class UsersResource(BaseResource):
 
         return self.client.post("users/update", data=data)
 
-    def bulk_update_users(self, data):
+    def bulk_update(self, data):
         """
         Bulk update or create users.
 
@@ -22,7 +22,7 @@ class UsersResource(BaseResource):
 
         return self.client.post("users/bulkUpdate", data=data)
 
-    def delete_user(self, email):
+    def delete(self, email):
         """
         Delete a user by email.
 
@@ -31,7 +31,7 @@ class UsersResource(BaseResource):
         """
         return self.client.post("users/delete", data={"email": email})
 
-    def get_user(self, email):
+    def get(self, email):
         """
         Get user data by email.
 
