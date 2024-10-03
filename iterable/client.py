@@ -1,7 +1,7 @@
 import requests
 from requests.adapters import HTTPAdapter
 from .config import IterableConfig
-from .resources import UsersResource, EventsResource, WorkflowResource
+from .resources import UsersResource, EventsResource, WorkflowResource, CommerceResource
 from .exceptions import (
     IterableAPIException,
     RateLimitException,
@@ -17,8 +17,9 @@ class IterableClient:
         self.config = config
         self.session = self._create_session()
 
-        self.users = UsersResource(self)
+        self.commerce = CommerceResource(self)
         self.events = EventsResource(self)
+        self.users = UsersResource(self)
         self.workflows = WorkflowResource(self)
 
     def _create_session(self):
