@@ -2,18 +2,18 @@ from .base import BaseResource
 
 
 class CatalogResource(BaseResource):
-    def bulk_create_items(self, catalog_name, items, replace_uploaded_fields_only=False):
+    def bulk_create_items(self, catalog_name, documents, replace_uploaded_fields_only=False):
         """
         Asynchronously create up to 1000 catalog items with a single request.
 
         :param catalog_name: Name of the catalog [Alphanumeric, dashes, case insensitive, 255 characters max]
-        :param items: List of dictionaries, each representing a catalog item
+        :param documents: List of dictionaries, each representing a catalog item
         :param replace_uploaded_fields_only: If True, only replace fields provided in the request
         :return: API response
         """
         endpoint = f"/api/catalogs/{catalog_name}/items"
         data = {
-            "items": items,
+            "documents": documents,
             "replaceUploadedFieldsOnly": replace_uploaded_fields_only
         }
         return self.client.post(endpoint, data=data)
