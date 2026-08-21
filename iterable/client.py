@@ -1,3 +1,7 @@
+import json
+import logging
+from decimal import Decimal
+
 import requests
 from requests.adapters import HTTPAdapter
 from .config import IterableConfig
@@ -7,9 +11,19 @@ from .exceptions import (
     RateLimitException,
     AuthenticationException,
 )
-import logging
 
 logger = logging.getLogger(__name__)
+
+
+def _encode_json_value(value):
+    """json.dumps default hook: Decimal is the one non-JSON type our callers
+    legitimately send (Django DecimalFields — prices, totals). Everything
+    else stays a TypeError so malformed payloads fail fast."""
+    if isinstance(value, Decimal):
+        return float(value)
+    raise TypeError(
+        f"Object of type {value.__class__.__name__} is not JSON serializable"
+    )
 
 
 class IterableClient:
@@ -34,9 +48,25 @@ class IterableClient:
         url = self.config.get_full_url(endpoint)
         # self.rate_limiter.wait() # currently disabled as we are using celery cooldowns
 
+        # Encode the body here instead of passing json= to requests: requests
+        # delegates to simplejson when the host environment happens to have it
+        # installed and to the stdlib json module when it doesn't, and the two
+        # disagree on Decimal. Encoding here pins one behavior regardless of
+        # the host environment. allow_nan=False matches requests' json= path.
+        body = None
+        headers = None
+        if data is not None:
+            body = json.dumps(data, allow_nan=False, default=_encode_json_value)
+            headers = {"Content-Type": "application/json"}
+
         try:
             response = self.session.request(
-                method, url, json=data, params=params, timeout=self.config.timeout
+                method,
+                url,
+                data=body,
+                headers=headers,
+                params=params,
+                timeout=self.config.timeout,
             )
             response.raise_for_status()
             return response.json()

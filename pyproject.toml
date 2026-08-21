@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "iterable"
-version = "0.1.7"
+version = "0.1.8"
 description = ""
 authors = ["Omer <omer@whoppah.com>"]
 readme = "README.md"
@@ -11,6 +11,7 @@ requests = "^2.32.3"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.6.7"
+pytest = "^8"
 
 [build-system]
 requires = ["poetry-core"]
